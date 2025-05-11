@@ -1,5 +1,5 @@
 import streamlit as st
-import opencv-python.cv2 as cv2
+import cv2 
 import numpy as np
 from ball_tracker import track_ball
 from pages.rules import show_rules_page
