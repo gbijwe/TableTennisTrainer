@@ -20,7 +20,6 @@ MarkupSafe==3.0.2
 matplotlib==3.10.3
 narwhals==1.39.0
 numpy==2.2.5
-opencv-python==4.11.0.86
 opencv-python-headless==4.10.0.84
 packaging==24.2
 pandas==2.2.3
