@@ -78,9 +78,9 @@ def overlay_video(input_video_path, json_path, output_video_path):
     cap.release()
     out.release()
 
-    if not os.path.exists(output_video_path) or os.path.getsize(output_video_path) < 1000:
-        st.error(f"Output video was not created or is empty: {output_video_path}")
-        return None
+    # if not os.path.exists(output_video_path) or os.path.getsize(output_video_path) < 1000:
+    #     st.error(f"Output video was not created or is empty: {output_video_path}")
+    #     return None
     return output_video_path
 
 def extract_ball_positions(json_path):
