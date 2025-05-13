@@ -3,23 +3,36 @@ import numpy as np
 import streamlit as st
 from roboflow import Roboflow
 import json
-
+import traceback
 def run_roboflow_inference(input_video_path, output_json_path):
-    rf = Roboflow(api_key="EJuRj2c5k4WSeHZHmqG7")
-    project = rf.workspace().project("ball-ugsvu-pejz9-l1ln1")
-    model = project.version("1").model
+    try:
+        st.info(f"Starting Roboflow inference for: {input_video_path}")
+        rf = Roboflow(api_key="EJuRj2c5k4WSeHZHmqG7")
+        project = rf.workspace().project("ball-ugsvu-pejz9-l1ln1")
+        model = project.version("1").model
 
-    job_id, signed_url, expire_time = model.predict_video(
-        input_video_path,
-        fps=24,
-        prediction_type="batch-video",
-    )
+        st.info("Calling model.predict_video...")
+        job_id, signed_url, expire_time = model.predict_video(
+            input_video_path,
+            fps=24,
+            prediction_type="batch-video",
+        )
+        st.write(f"Roboflow job_id: {job_id}")
+        # st.write(f"Signed URL: {signed_url}")
+        # st.write(f"Expire time: {expire_time}")
 
-    results = model.poll_until_video_results(job_id)
+        st.info("Polling for video results...")
+        results = model.poll_until_video_results(job_id)
+        st.write("Roboflow results:", results)
 
-    with open(output_json_path, "w") as json_file:
-        json.dump(results, json_file, indent=2)
-    return output_json_path
+        with open(output_json_path, "w") as json_file:
+            json.dump(results, json_file, indent=2)
+        st.success(f"Roboflow inference complete. Output saved to {output_json_path}")
+        return output_json_path
+    except Exception as e:
+        st.error(f"Roboflow inference failed: {e}")
+        st.error(traceback.format_exc())
+        return None
 
 def overlay_video(input_video_path, json_path, output_video_path):
     with open(json_path, 'r') as json_file:
@@ -64,3 +77,22 @@ def overlay_video(input_video_path, json_path, output_video_path):
     cap.release()
     out.release()
     return output_video_path
+
+def extract_ball_positions(json_path):
+    """Extracts (x, y) positions from Roboflow JSON output."""
+    with open(json_path, 'r') as json_file:
+        inference_data = json.load(json_file)
+    positions = []
+    frames = inference_data.get('ball-ugsvu-pejz9-l1ln1', [])
+    for frame_data in frames:
+        preds = frame_data.get('predictions', [])
+        if preds:
+            # Use the first prediction (or refine as needed)
+            x = int(preds[0]['x'])
+            y = int(preds[0]['y'])
+            positions.append((x, y))
+        else:
+            positions.append((None, None))  # No detection in this frame
+    # Remove frames with None
+    positions = [p for p in positions if None not in p]
+    return positions
