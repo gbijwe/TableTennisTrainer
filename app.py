@@ -77,7 +77,8 @@ elif page == "Ball Detection":
             overlay_video(input_video_path, output_json_path, output_video_path)
 
         st.success("Processing complete!")
-        st.video(output_video_path)
+        with open(output_video_path, "rb") as video_file:
+            st.video(video_file.read())
 
 elif page == "3D Trajectory":
     st.title("3D Ball Trajectory from Top and Side Views")
